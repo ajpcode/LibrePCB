@@ -23,6 +23,7 @@
 #include "symboleditorstate_select.h"
 
 #include "../dialogs/symbolpinpropertiesdialog.h"
+#include "../symbolclipboarddata.h"
 #include "../symboleditorwidget.h"
 #include "cmd/cmdmoveselectedsymbolitems.h"
 #include "cmd/cmdremoveselectedsymbolitems.h"
@@ -202,6 +203,37 @@ bool SymbolEditorState_Select::processGraphicsSceneRightMouseButtonReleased(
   }
 }
 
+bool SymbolEditorState_Select::processCut() noexcept {
+  switch (mState) {
+    case SubState::IDLE: {
+      if (copySelectedItemsToClipboard()) {
+        return removeSelectedItems();
+      } else {
+        return false;
+      }
+    }
+    default: { return false; }
+  }
+}
+
+bool SymbolEditorState_Select::processCopy() noexcept {
+  switch (mState) {
+    case SubState::IDLE: {
+      return copySelectedItemsToClipboard();
+    }
+    default: { return false; }
+  }
+}
+
+bool SymbolEditorState_Select::processPaste() noexcept {
+  switch (mState) {
+    case SubState::IDLE: {
+      return pasteFromClipboard();
+    }
+    default: { return false; }
+  }
+}
+
 bool SymbolEditorState_Select::processRotateCw() noexcept {
   switch (mState) {
     case SubState::IDLE: {
@@ -306,6 +338,46 @@ bool SymbolEditorState_Select::openPropertiesDialogOfItemAtPos(
   } else {
     return false;
   }
+}
+
+bool SymbolEditorState_Select::copySelectedItemsToClipboard() noexcept {
+  try {
+    SymbolClipboardData data;
+    // pins
+    foreach (const QSharedPointer<SymbolPinGraphicsItem>& pin,
+             mContext.symbolGraphicsItem.getSelectedPins()) {
+      Q_ASSERT(pin);
+      data.getPins().append(std::make_shared<SymbolPin>(pin->getPin()));
+    }
+    // circles
+    foreach (const QSharedPointer<CircleGraphicsItem>& circle,
+             mContext.symbolGraphicsItem.getSelectedCircles()) {
+      Q_ASSERT(circle);
+      data.getCircles().append(std::make_shared<Circle>(circle->getCircle()));
+    }
+    // polygons
+    foreach (const QSharedPointer<PolygonGraphicsItem>& polygon,
+             mContext.symbolGraphicsItem.getSelectedPolygons()) {
+      Q_ASSERT(polygon);
+      data.getPolygons().append(
+          std::make_shared<Polygon>(polygon->getPolygon()));
+    }
+    // texts
+    foreach (const QSharedPointer<TextGraphicsItem>& text,
+             mContext.symbolGraphicsItem.getSelectedTexts()) {
+      Q_ASSERT(text);
+      data.getTexts().append(std::make_shared<Text>(text->getText()));
+    }
+    // copy to clipboard
+    qApp->clipboard()->setMimeData(data.toMimeData().release());
+  } catch (const Exception& e) {
+    QMessageBox::critical(&mContext.editorWidget, tr("Error"), e.getMsg());
+  }
+  return true;
+}
+
+bool SymbolEditorState_Select::pasteFromClipboard() noexcept {
+  return false;
 }
 
 bool SymbolEditorState_Select::rotateSelectedItems(

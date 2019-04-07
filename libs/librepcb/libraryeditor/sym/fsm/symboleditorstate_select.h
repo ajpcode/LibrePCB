@@ -68,6 +68,9 @@ public:
       QGraphicsSceneMouseEvent& e) noexcept override;
   bool processGraphicsSceneRightMouseButtonReleased(
       QGraphicsSceneMouseEvent& e) noexcept override;
+  bool processCut() noexcept override;
+  bool processCopy() noexcept override;
+  bool processPaste() noexcept override;
   bool processRotateCw() noexcept override;
   bool processRotateCcw() noexcept override;
   bool processRemove() noexcept override;
@@ -79,6 +82,8 @@ public:
 private:  // Methods
   bool openContextMenuAtPos(const Point& pos) noexcept;
   bool openPropertiesDialogOfItemAtPos(const Point& pos) noexcept;
+  bool copySelectedItemsToClipboard() noexcept;
+  bool pasteFromClipboard() noexcept;
   bool rotateSelectedItems(const Angle& angle) noexcept;
   bool removeSelectedItems() noexcept;
   void setSelectionRect(const Point& p1, const Point& p2) noexcept;

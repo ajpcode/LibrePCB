@@ -94,6 +94,7 @@ SOURCES += \
     sym/fsm/symboleditorstate_drawtext.cpp \
     sym/fsm/symboleditorstate_drawtextbase.cpp \
     sym/fsm/symboleditorstate_select.cpp \
+    sym/symbolclipboarddata.cpp \
     sym/symboleditorwidget.cpp \
 
 HEADERS += \
@@ -172,6 +173,7 @@ HEADERS += \
     sym/fsm/symboleditorstate_drawtext.h \
     sym/fsm/symboleditorstate_drawtextbase.h \
     sym/fsm/symboleditorstate_select.h \
+    sym/symbolclipboarddata.h \
     sym/symboleditorwidget.h \
 
 FORMS += \
