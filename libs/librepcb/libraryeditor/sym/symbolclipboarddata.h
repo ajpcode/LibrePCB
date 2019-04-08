@@ -50,12 +50,14 @@ namespace editor {
 class SymbolClipboardData final : public SerializableObject {
 public:
   // Constructors / Destructor
-  SymbolClipboardData() noexcept;
+  SymbolClipboardData()                                 = delete;
   SymbolClipboardData(const SymbolClipboardData& other) = delete;
+  explicit SymbolClipboardData(const Uuid& symbolUuid) noexcept;
   explicit SymbolClipboardData(const SExpression& node);
   ~SymbolClipboardData() noexcept;
 
   // Getters
+  const Uuid&          getSymbolUuid() const noexcept { return mSymbolUuid; }
   SymbolPinList&       getPins() noexcept { return mPins; }
   const SymbolPinList& getPins() const noexcept { return mPins; }
   PolygonList&         getPolygons() noexcept { return mPolygons; }
@@ -66,7 +68,9 @@ public:
   const TextList&      getTexts() const noexcept { return mTexts; }
 
   // General Methods
-  std::unique_ptr<QMimeData> toMimeData() const;
+  std::unique_ptr<QMimeData>                  toMimeData() const;
+  static std::unique_ptr<SymbolClipboardData> fromMimeData(
+      const QMimeData* mime);
 
   // Operator Overloadings
   SymbolClipboardData& operator=(const SymbolClipboardData& rhs) = delete;
@@ -76,6 +80,7 @@ private:  // Methods
   void serialize(SExpression& root) const override;
 
 private:  // Data
+  Uuid          mSymbolUuid;
   SymbolPinList mPins;
   PolygonList   mPolygons;
   CircleList    mCircles;

@@ -26,6 +26,7 @@
 #include "../symbolclipboarddata.h"
 #include "../symboleditorwidget.h"
 #include "cmd/cmdmoveselectedsymbolitems.h"
+#include "cmd/cmdpastesymbolitems.h"
 #include "cmd/cmdremoveselectedsymbolitems.h"
 #include "cmd/cmdrotateselectedsymbolitems.h"
 
@@ -34,9 +35,11 @@
 #include <librepcb/common/dialogs/textpropertiesdialog.h>
 #include <librepcb/common/graphics/circlegraphicsitem.h>
 #include <librepcb/common/graphics/graphicsscene.h>
+#include <librepcb/common/graphics/graphicsview.h>
 #include <librepcb/common/graphics/polygongraphicsitem.h>
 #include <librepcb/common/graphics/textgraphicsitem.h>
 #include <librepcb/common/undostack.h>
+#include <librepcb/library/sym/symbol.h>
 #include <librepcb/library/sym/symbolgraphicsitem.h>
 #include <librepcb/library/sym/symbolpingraphicsitem.h>
 
@@ -342,7 +345,7 @@ bool SymbolEditorState_Select::openPropertiesDialogOfItemAtPos(
 
 bool SymbolEditorState_Select::copySelectedItemsToClipboard() noexcept {
   try {
-    SymbolClipboardData data;
+    SymbolClipboardData data(mContext.symbol.getUuid());
     // pins
     foreach (const QSharedPointer<SymbolPinGraphicsItem>& pin,
              mContext.symbolGraphicsItem.getSelectedPins()) {
@@ -377,7 +380,20 @@ bool SymbolEditorState_Select::copySelectedItemsToClipboard() noexcept {
 }
 
 bool SymbolEditorState_Select::pasteFromClipboard() noexcept {
-  return false;
+  try {
+    std::unique_ptr<SymbolClipboardData> data =
+        SymbolClipboardData::fromMimeData(
+            qApp->clipboard()->mimeData());  // can throw
+    if (data) {
+      Point posOffset = mContext.graphicsView.mapGlobalPosToScenePos(
+          QCursor::pos(), true, true);
+      mContext.undoStack.execCmd(
+          new CmdPasteSymbolItems(mContext.symbol, std::move(data), posOffset));
+    }
+  } catch (const Exception& e) {
+    QMessageBox::critical(&mContext.editorWidget, tr("Error"), e.getMsg());
+  }
+  return true;
 }
 
 bool SymbolEditorState_Select::rotateSelectedItems(

@@ -79,6 +79,7 @@ SOURCES += \
     pkgcat/packagecategoryeditorwidget.cpp \
     sym/dialogs/symbolpinpropertiesdialog.cpp \
     sym/fsm/cmd/cmdmoveselectedsymbolitems.cpp \
+    sym/fsm/cmd/cmdpastesymbolitems.cpp \
     sym/fsm/cmd/cmdremoveselectedsymbolitems.cpp \
     sym/fsm/cmd/cmdrotateselectedsymbolitems.cpp \
     sym/fsm/symboleditorfsm.cpp \
@@ -158,6 +159,7 @@ HEADERS += \
     pkgcat/packagecategoryeditorwidget.h \
     sym/dialogs/symbolpinpropertiesdialog.h \
     sym/fsm/cmd/cmdmoveselectedsymbolitems.h \
+    sym/fsm/cmd/cmdpastesymbolitems.h \
     sym/fsm/cmd/cmdremoveselectedsymbolitems.h \
     sym/fsm/cmd/cmdrotateselectedsymbolitems.h \
     sym/fsm/symboleditorfsm.h \

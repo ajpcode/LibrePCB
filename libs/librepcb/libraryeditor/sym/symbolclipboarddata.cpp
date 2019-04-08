@@ -36,11 +36,16 @@ namespace editor {
  *  Constructors / Destructor
  ******************************************************************************/
 
-SymbolClipboardData::SymbolClipboardData() noexcept {
+SymbolClipboardData::SymbolClipboardData(const Uuid& symbolUuid) noexcept
+  : mSymbolUuid(symbolUuid) {
 }
 
 SymbolClipboardData::SymbolClipboardData(const SExpression& node)
-  : mPins(node), mPolygons(node), mCircles(node), mTexts(node) {
+  : mSymbolUuid(node.getValueOfFirstChild<Uuid>(true)),
+    mPins(node),
+    mPolygons(node),
+    mCircles(node),
+    mTexts(node) {
 }
 
 SymbolClipboardData::~SymbolClipboardData() noexcept {
@@ -61,11 +66,25 @@ std::unique_ptr<QMimeData> SymbolClipboardData::toMimeData() const {
   return std::move(data);
 }
 
+std::unique_ptr<SymbolClipboardData> SymbolClipboardData::fromMimeData(
+    const QMimeData* mime) {
+  QByteArray content =
+      mime ? mime->data("application/x-librepcb-symbol") : QByteArray();
+  if (!content.isNull()) {
+    SExpression root = SExpression::parse(content, FilePath());
+    return std::unique_ptr<SymbolClipboardData>(
+        new SymbolClipboardData(root));  // can throw
+  } else {
+    return nullptr;
+  }
+}
+
 /*******************************************************************************
  *  Private Methods
  ******************************************************************************/
 
 void SymbolClipboardData::serialize(SExpression& root) const {
+  root.appendChild(mSymbolUuid);
   mPins.serialize(root);
   mPolygons.serialize(root);
   mCircles.serialize(root);
